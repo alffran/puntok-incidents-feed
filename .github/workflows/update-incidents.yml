@@ -1,0 +1,67 @@
+name: Update PuntoK incidents
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "*/15 * * * *"
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: puntok-incidents-pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Build incidents JSON
+        run: |
+          mkdir -p public
+          node scripts/build-incidents-feed.js --out public/puntok-incidents-palencia.json
+
+      - name: Add simple status page
+        run: |
+          cat > public/index.html <<'HTML'
+          <!doctype html>
+          <html lang="es">
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <title>PuntoK Rescate - Incidencias</title>
+            <body>
+              <h1>PuntoK Rescate</h1>
+              <p>Feed ligero de incidencias para la app.</p>
+              <p><a href="puntok-incidents-palencia.json">puntok-incidents-palencia.json</a></p>
+            </body>
+          </html>
+          HTML
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
