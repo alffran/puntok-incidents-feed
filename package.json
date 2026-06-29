@@ -1,0 +1,13 @@
+{
+  "name": "puntok-incidents-feed",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "build": "node scripts/build-incidents-feed.js --out public/puntok-incidents-palencia.json",
+    "test": "node --check scripts/build-incidents-feed.js"
+  },
+  "dependencies": {
+    "xml2js": "^0.6.2"
+  }
+}
