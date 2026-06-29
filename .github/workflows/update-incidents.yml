@@ -25,11 +25,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "22"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
 
       - name: Build incidents JSON
         run: |
           mkdir -p public
-          node scripts/build-incidents-feed.js --out public/puntok-incidents-palencia.json
+          npm run build
 
       - name: Add simple status page
         run: |
